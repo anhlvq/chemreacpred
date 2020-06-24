@@ -8,14 +8,12 @@ if sys.version_info >= (3, 0):
 else:
     import __builtin__ as bltin
 
-
 import time
 
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from dummy_pool_executor import DummyPoolExecutor
 from sklearn import linear_model
 from sklearn.base import RegressorMixin, MetaEstimatorMixin, BaseEstimator
-from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, BaggingRegressor
+from sklearn.ensemble import RandomForestRegressor, BaggingRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures
@@ -23,7 +21,7 @@ from sklearn.svm import SVR, LinearSVR
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import GridSearchCV
 import numpy as np
-#from theano.gradient import np
+# from theano.gradient import np
 
 from nn_regression import MLPRegressor
 from nw_kernel_regression import KernelRegression
@@ -43,19 +41,22 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
 
         self._ensemble_nn = [MLPRegressor(nb_epoch=1000) for _ in range(5)]  # 5 Multi Layer Perceptrons in the ensemble
 
-        self._ensemble_nn_large = [MLPRegressor(nb_epoch=500) for _ in range(10)]  # 5 Multi Layer Perceptrons in the ensemble
-        self._ensemble_nn_xlarge = [MLPRegressor(nb_epoch=500) for _ in range(30)]  # 5 Multi Layer Perceptrons in the ensemble
-        self._ensemble_nn_different = [MLPRegressor(num_hidden_units=(i+5), nb_epoch=500) for i in range(10)]  # 5 Different MLPs in the ensemble
+        self._ensemble_nn_large = [MLPRegressor(nb_epoch=500) for _ in
+                                   range(10)]  # 5 Multi Layer Perceptrons in the ensemble
+        self._ensemble_nn_xlarge = [MLPRegressor(nb_epoch=500) for _ in
+                                    range(30)]  # 5 Multi Layer Perceptrons in the ensemble
+        self._ensemble_nn_different = [MLPRegressor(num_hidden_units=(i + 5), nb_epoch=500) for i in
+                                       range(10)]  # 5 Different MLPs in the ensemble
 
         self._ensemble_ridge_regression = [
             linear_model.Ridge(alpha=alpha, fit_intercept=True, normalize=True)
-            for alpha in np.arange(.1,1,.2)]  # 5 Ridge Regressors
+            for alpha in np.arange(.1, 1, .2)]  # 5 Ridge Regressors
 
         self._ensemble_auto_large = (
             # linear_model.LinearRegression(fit_intercept=True),
             # make_pipeline(PolynomialFeatures(degree=2), LinearRegression(fit_intercept=True)),
             linear_model.Ridge(alpha=0.5, fit_intercept=True, normalize=True),
-            GridSearchCV(KernelRegression(), param_grid={'kernel': ['poly','rbf','sigmoid']}),
+            GridSearchCV(KernelRegression(), param_grid={'kernel': ['poly', 'rbf', 'sigmoid']}),
             # # linear_model.RidgeCV(alphas=[.01, .1, .3, .5, 1], fit_intercept=True),
             linear_model.Lasso(alpha=0.1, fit_intercept=True),
             # # linear_model.LassoCV(n_alphas=100, fit_intercept=True, max_iter=5000),
@@ -70,7 +71,7 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
             LinearSVR(max_iter=1e3, fit_intercept=True, loss='squared_epsilon_insensitive', C=1),
             # GridSearchCV(SVR(kernel='poly', max_iter=1e5), param_grid={'C': [.01, .1, 1, 10]}, n_jobs=-1),
             # # SVR(max_iter=1e3, kernel='poly', C=1, degree=3),
-            GridSearchCV(SVR(kernel='rbf',max_iter=1e5),param_grid={'C': [.01,.1,1,10]}, n_jobs=-1),
+            GridSearchCV(SVR(kernel='rbf', max_iter=1e5), param_grid={'C': [.01, .1, 1, 10]}, n_jobs=-1),
             # # SVR(max_iter=1e3, kernel='rbf', C=1,verbose=True),
             # GridSearchCV(SVR(kernel='sigmoid', max_iter=1e5), param_grid={'C': [.01, .1, 1, 10]}, n_jobs=-1),
             # # SVR(max_iter=1e3, kernel='sigmoid', C=1,verbose=True),
@@ -99,7 +100,7 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
         self.__init_ensembles()
         self._thread_lock = Lock()
         self._verbose = verbose
-        self.type = type.lower() # convert type to lowercase
+        self.type = type.lower()  # convert type to lowercase
 
         if type == 'mlp':
             self.regressors = self._ensemble_nn
@@ -116,7 +117,6 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
         else:
             self.regressors = self._ensemble_regressors_auto
 
-
         # set regressor labels
         self.regressor_labels = []
         self.regressor_count = len(self.regressors)
@@ -131,7 +131,7 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
 
     def fit_one(self, regr, X, y):
         try:
-            return regr.fit(X,y)
+            return regr.fit(X, y)
         except Exception as e:
             print('Exception caught while trying to fit {0}:\n{1}'.format(regr, e), file=sys.stderr)
 
@@ -212,6 +212,6 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
         :return: vector with the MSE for each regressor
         """
         Z = self.predict(X_test)
-        return np.mean((Z - y_test[None, :])**2, 1)
+        return np.mean((Z - y_test[None, :]) ** 2, 1)
         # y[None, :] ensures that the vector is properly oriented
         # np.mean(..., 1) does the mean along the columns returning regressor_count results
