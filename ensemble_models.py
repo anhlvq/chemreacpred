@@ -66,7 +66,7 @@ class StackedEnsembleRegression:
                 # save the preprocessing parameters for prediction
                 DATA_params[m] = {'mean': scaler.mean_, 'variance': scaler.var_, 'columns': columns_select}
                 # select a random sample size according to the pre-defined ratio ("sample_ratio")
-                X_train, X_test, Y_train, Y_test = train_test_split(X_tr, Y, \
+                X_train, X_test, Y_train, Y_test = train_test_split(X_tr, Y,
                                                                     test_size=self.sample_ratio,
                                                                     random_state=self.random_state)
                 # optimize all the sub_model parameters
