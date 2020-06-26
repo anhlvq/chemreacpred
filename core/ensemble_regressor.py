@@ -10,7 +10,7 @@ else:
 
 import time
 
-from dummy_pool_executor import DummyPoolExecutor
+from experiments.dummy_pool_executor import DummyPoolExecutor
 from sklearn import linear_model
 from sklearn.base import RegressorMixin, MetaEstimatorMixin, BaseEstimator
 from sklearn.ensemble import RandomForestRegressor, BaggingRegressor
@@ -23,8 +23,8 @@ from sklearn.model_selection import GridSearchCV
 import numpy as np
 # from theano.gradient import np
 
-from nn_regression import MLPRegressor
-from nw_kernel_regression import KernelRegression
+from core.nn_regression import MLPRegressor
+from core.nw_kernel_regression import KernelRegression
 
 
 class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
