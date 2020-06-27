@@ -1,9 +1,3 @@
-"""The :mod:`sklearn.kernel_regressor` module implements the Kernel Regressor.
-"""
-# Author: Jan Hendrik Metzen <janmetzen@mailbox.de>
-#
-# License: BSD 3 clause
-
 import numpy as np
 
 from sklearn.metrics.pairwise import pairwise_kernels

@@ -24,7 +24,7 @@ import numpy as np
 # from theano.gradient import np
 
 from core.nn_regression import MLPRegressor
-from core.nw_kernel_regression import KernelRegression
+from core.kernel_regressor import KernelRegression
 
 
 class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
