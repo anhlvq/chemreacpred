@@ -3,6 +3,8 @@ import sys
 import traceback
 from threading import Lock
 
+from core.curve_regressor import CurveRegressor
+
 if sys.version_info >= (3, 0):
     import builtins as bltin
 else:
@@ -10,82 +12,20 @@ else:
 
 import time
 
-from experiments.dummy_pool_executor import DummyPoolExecutor
-from sklearn import linear_model
+from core.dummy_pool_executor import DummyPoolExecutor
 from sklearn.base import RegressorMixin, MetaEstimatorMixin, BaseEstimator
-from sklearn.ensemble import RandomForestRegressor, BaggingRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.svm import SVR, LinearSVR
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.model_selection import GridSearchCV
 import numpy as np
 # from theano.gradient import np
-
-from core.nn_regression import MLPRegressor
-from core.kernel_regressor import KernelRegression
 
 
 class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
     def __init_ensembles(self):
         # (Not static any more) Static member variables
         self._ensemble_regressors_auto = (
-            linear_model.LinearRegression(fit_intercept=True),
-            make_pipeline(PolynomialFeatures(degree=2), LinearRegression(fit_intercept=False)),
-            KernelRegression(kernel='poly'),
-            DecisionTreeRegressor(max_depth=4),
-            DecisionTreeRegressor(max_depth=None),
-            RandomForestRegressor(n_estimators=100),
+            CurveRegressor(),
+            CurveRegressor(),
+            CurveRegressor()
         )
-
-        self._ensemble_nn = [MLPRegressor(nb_epoch=1000) for _ in range(5)]  # 5 Multi Layer Perceptrons in the ensemble
-
-        self._ensemble_nn_large = [MLPRegressor(nb_epoch=500) for _ in
-                                   range(10)]  # 5 Multi Layer Perceptrons in the ensemble
-        self._ensemble_nn_xlarge = [MLPRegressor(nb_epoch=500) for _ in
-                                    range(30)]  # 5 Multi Layer Perceptrons in the ensemble
-        self._ensemble_nn_different = [MLPRegressor(num_hidden_units=(i + 5), nb_epoch=500) for i in
-                                       range(10)]  # 5 Different MLPs in the ensemble
-
-        self._ensemble_ridge_regression = [
-            linear_model.Ridge(alpha=alpha, fit_intercept=True, normalize=True)
-            for alpha in np.arange(.1, 1, .2)]  # 5 Ridge Regressors
-
-        self._ensemble_auto_large = (
-            # linear_model.LinearRegression(fit_intercept=True),
-            # make_pipeline(PolynomialFeatures(degree=2), LinearRegression(fit_intercept=True)),
-            linear_model.Ridge(alpha=0.5, fit_intercept=True, normalize=True),
-            GridSearchCV(KernelRegression(), param_grid={'kernel': ['poly', 'rbf', 'sigmoid']}),
-            # # linear_model.RidgeCV(alphas=[.01, .1, .3, .5, 1], fit_intercept=True),
-            linear_model.Lasso(alpha=0.1, fit_intercept=True),
-            # # linear_model.LassoCV(n_alphas=100, fit_intercept=True, max_iter=5000),
-            # # linear_model.ElasticNet(alpha=1),
-            # # linear_model.ElasticNetCV(n_alphas=100, l1_ratio=.5),
-            linear_model.OrthogonalMatchingPursuit(),
-            # # linear_model.BayesianRidge(),
-            # # # linear_model.ARDRegression(),
-            # # linear_model.SGDRegressor(),
-            # # linear_model.PassiveAggressiveRegressor(loss='squared_epsilon_insensitive'),
-            # # linear_model.RANSACRegressor(),
-            LinearSVR(max_iter=1e3, fit_intercept=True, loss='squared_epsilon_insensitive', C=1),
-            # GridSearchCV(SVR(kernel='poly', max_iter=1e5), param_grid={'C': [.01, .1, 1, 10]}, n_jobs=-1),
-            # # SVR(max_iter=1e3, kernel='poly', C=1, degree=3),
-            GridSearchCV(SVR(kernel='rbf', max_iter=1e5), param_grid={'C': [.01, .1, 1, 10]}, n_jobs=-1),
-            # # SVR(max_iter=1e3, kernel='rbf', C=1,verbose=True),
-            # GridSearchCV(SVR(kernel='sigmoid', max_iter=1e5), param_grid={'C': [.01, .1, 1, 10]}, n_jobs=-1),
-            # # SVR(max_iter=1e3, kernel='sigmoid', C=1,verbose=True),
-            # # DecisionTreeRegressor(max_depth=5),
-            DecisionTreeRegressor(max_depth=4),
-            DecisionTreeRegressor(max_depth=None),
-            RandomForestRegressor(n_estimators=100),
-            # AdaBoostRegressor(learning_rate=0.9, loss='square'),
-            BaggingRegressor(),
-            # # MLPRegressor(num_hidden_units=5)
-        )
-
-        # 5 Multi Layer Perceptrons in the ensemble
-        # self._ensemble_nn = [MLPRegressor(num_hidden_units=(i+6), nb_epoch=(i+6)*100) for i in range(5)]
 
     def __init__(self, type='auto', verbose=False):
         '''
@@ -101,7 +41,7 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
         self._thread_lock = Lock()
         self._verbose = verbose
         self.type = type.lower()  # convert type to lowercase
-
+        """""
         if type == 'mlp':
             self.regressors = self._ensemble_nn
         elif type == 'mlp_large':
@@ -115,7 +55,8 @@ class EnsembleRegressor(BaseEstimator, MetaEstimatorMixin, RegressorMixin):
         elif type == 'auto_large':
             self.regressors = self._ensemble_auto_large
         else:
-            self.regressors = self._ensemble_regressors_auto
+        """""
+        self.regressors = self._ensemble_regressors_auto
 
         # set regressor labels
         self.regressor_labels = []
