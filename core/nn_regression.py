@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from keras.layers import Dense
+from keras.layers.core import Dense
 from keras.models import Sequential
 from sklearn import preprocessing
 from sklearn.base import BaseEstimator, RegressorMixin
