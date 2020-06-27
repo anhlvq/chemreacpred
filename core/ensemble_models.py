@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn import preprocessing
 from sklearn.base import clone
-from sklearn.externals import joblib
+import joblib
 from sklearn.model_selection import train_test_split
 
 
