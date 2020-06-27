@@ -10,7 +10,7 @@ from sklearn.model_selection import cross_val_predict
 from vecstack import stacking
 
 n_folds = 5
-temp_dir = 'tmpdw35lg54ms80eb42'
+temp_dir = '../tmpdw35lg54ms80eb42'
 
 try:
     os.rmdir(temp_dir)
