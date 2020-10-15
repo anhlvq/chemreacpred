@@ -1,8 +1,10 @@
 import glob
 import os
 import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 
-from utils.config import path_dir_descriptor, path_dir_data, path_dir_tsOutput
+from utils.config import path_dir_descriptor, path_dir_data, path_dir_tsOutput, Poly_degree
 
 
 # Load descriptor
@@ -59,10 +61,17 @@ def loadTimeSeriesCsv(fname):
     return tsList
 
 
+def PolyRegression(degree, x, y):
+    x_ = PolynomialFeatures(degree=degree, include_bias=True).fit_transform(x)
+    model = LinearRegression(fit_intercept=False).fit(x_, y)
+    return model.coef_
+
+
 def makeTrainingDataOutput(fname="output.csv"):
     all_files = glob.glob(os.path.join(path_dir_tsOutput, "*.csv"))
     for fname in all_files:
         tsList = loadTimeSeriesCsv(fname)
         for ts in tsList:
+            coef = PolyRegression(degree=Poly_degree)
             ts.to_csv(os.path.join(path_dir_data, fname))
     # df = pd.read_csv("")
