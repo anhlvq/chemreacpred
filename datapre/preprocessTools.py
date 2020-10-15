@@ -2,7 +2,7 @@ import glob
 import os
 import pandas as pd
 
-from utils.config import path_dir_descriptor, path_dir_data
+from utils.config import path_dir_descriptor, path_dir_data, path_dir_tsOutput
 
 
 # Load descriptor
@@ -48,5 +48,21 @@ def makeTraingDataFeatures(fname="features.csv"):
     df = combineData()
     df.to_csv(os.path.join(path_dir_data, fname), index=False)
 
+
+def loadTimeSeriesCsv(fname):
+    df = pd.read_csv(fname)
+    ncols = df.shape()[1]
+    tsList = []
+    for col in range(1, ncols):
+        df1 = df[[0, col]]
+        tsList = tsList.append(df1)
+    return tsList
+
+
 def makeTrainingDataOutput(fname="output.csv"):
-    df = pd.read_csv("")
+    all_files = glob.glob(os.path.join(path_dir_tsOutput, "*.csv"))
+    for fname in all_files:
+        tsList = loadTimeSeriesCsv(fname)
+        for ts in tsList:
+            ts.to_csv(os.path.join(path_dir_data, fname))
+    # df = pd.read_csv("")
