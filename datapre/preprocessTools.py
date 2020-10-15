@@ -3,8 +3,9 @@ import os
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+import numpy as np
 
-from utils.config import path_dir_descriptor, path_dir_data, path_dir_tsOutput, Poly_degree
+from utils.config import path_dir_descriptor, path_dir_data, path_dir_tsOutput, Poly_degree, path_file_mapping
 
 
 # Load descriptor
@@ -51,27 +52,44 @@ def makeTraingDataFeatures(fname="features.csv"):
     df.to_csv(os.path.join(path_dir_data, fname), index=False)
 
 
-def loadTimeSeriesCsv(fname):
-    df = pd.read_csv(fname)
-    ncols = df.shape()[1]
-    tsList = []
-    for col in range(1, ncols):
-        df1 = df[[0, col]]
-        tsList = tsList.append(df1)
-    return tsList
-
-
 def PolyRegression(degree, x, y):
     x_ = PolynomialFeatures(degree=degree, include_bias=True).fit_transform(x)
     model = LinearRegression(fit_intercept=False).fit(x_, y)
     return model.coef_
 
 
-def makeTrainingDataOutput(fname="output.csv"):
+# load TimeseriesCsv and convert to Polynomial Regression coefficients
+def loadTimeSeriesCsv(fname):
+    df = pd.read_csv(fname)
+    ncols = df.shape[1]
+    x_ = np.array(df.iloc[:, 0])
+    x_ = x_.reshape(-1, 1)
+    coef_df = pd.DataFrame()
+    for col in range(1, ncols):
+        y_ = np.array(df.iloc[:, col])
+        id_ = df.columns.values[col]
+        coef_ = PolyRegression(degree=Poly_degree, x=x_, y=y_)
+        row = pd.DataFrame()
+        row["id"] = [id_]
+        row["coef"] = [coef_]
+        coef_df = coef_df.append(row)
+    return coef_df
+
+
+def loadDataOutput():
     all_files = glob.glob(os.path.join(path_dir_tsOutput, "*.csv"))
+    coef_df = pd.DataFrame()
     for fname in all_files:
-        tsList = loadTimeSeriesCsv(fname)
-        for ts in tsList:
-            coef = PolyRegression(degree=Poly_degree)
-            ts.to_csv(os.path.join(path_dir_data, fname))
-    # df = pd.read_csv("")
+        coef_ = loadTimeSeriesCsv(fname)
+        coef_df = coef_df.append(coef_)
+    return coef_df
+
+
+def makeTrainingDataOutput(fname="output.csv"):
+    df = loadDataOutput()
+    # Load Mapping
+    mapping = pd.read_csv(path_file_mapping)
+    mapping = mapping.set_index("id").T
+    di = mapping.to_dict(orient="list")
+    df["id"].replace(di, inplace=True)
+    df.to_csv(os.path.join(path_dir_data, fname), index=False)
