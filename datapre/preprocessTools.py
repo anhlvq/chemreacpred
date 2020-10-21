@@ -53,17 +53,18 @@ def makeTraingDataFeatures(fname="features.csv"):
     df.to_csv(os.path.join(path_dir_data, fname), index=False)
 
 
-def loadTrainingDataFeatures(fname="features.csv", isNormalized=True):
+def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):
     file = fname
     if fname is loadTrainingDataFeatures.__defaults__[0]:
         file = os.path.join(path_dir_data, fname)
     df = pd.read_csv(file)
-    idList = df["id"]
-    X = df.drop(columns={"id"}).values  # return a numpy array
+    idList = df[['id']].values
+    df1 = df.drop(columns={'id'})
+    X = df1.values  # return a numpy array
     if isNormalized:
-        min_max_scaler = preprocessing.MinMaxScaler()
-        x_scaled = min_max_scaler.fit_transform(X)
-        X = x_scaled
+        scaler = preprocessing.StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        X = X_scaled
     return idList, X
 
 
