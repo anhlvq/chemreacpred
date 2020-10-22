@@ -74,9 +74,29 @@ def PolyRegression(degree, x, y):
     return model.coef_
 
 
-# load TimeseriesCsv and convert to Polynomial Regression coefficients
+# load TimeseriesCsv
 def loadTimeSeriesCsv(fname):
     df = pd.read_csv(fname)
+    return df
+
+
+def loadTimeSeriesOutput():
+    files = glob.glob(os.path.join(path_dir_tsOutput, "*.csv"))
+    df_list = list()
+    for fname in files:
+        df = loadTimeSeriesCsv(fname)
+        df_list.append(df)
+    return df_list
+
+
+def extractTimeSeries(df, col):
+    x_ = np.array(df.iloc[:, 0])
+    y_ = np.array(df.iloc[:, col])
+    return x_, y_
+
+
+# convert to Polynomial Regression coefficients
+def convertToPolynomialRegression(df, degree=Poly_degree):
     ncols = df.shape[1]
     x_ = np.array(df.iloc[:, 0])
     x_ = x_.reshape(-1, 1)
@@ -84,7 +104,7 @@ def loadTimeSeriesCsv(fname):
     for col in range(1, ncols):
         y_ = np.array(df.iloc[:, col])
         id_ = df.columns.values[col]
-        coef_ = PolyRegression(degree=Poly_degree, x=x_, y=y_)
+        coef_ = PolyRegression(degree=degree, x=x_, y=y_)
         row = pd.DataFrame()
         row["id"] = [id_]
         row["coef"] = [coef_]
@@ -96,7 +116,8 @@ def loadDataOutput():
     all_files = glob.glob(os.path.join(path_dir_tsOutput, "*.csv"))
     coef_df = pd.DataFrame()
     for fname in all_files:
-        coef_ = loadTimeSeriesCsv(fname)
+        df = loadTimeSeriesCsv(fname)
+        coef_ = convertToPolynomialRegression(df, degree=Poly_degree)
         coef_df = coef_df.append(coef_)
     return coef_df
 
