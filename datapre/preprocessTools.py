@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn import preprocessing
 import numpy as np
 
 from utils.config import path_dir_descriptor, path_dir_data, path_dir_tsOutput, Poly_degree, path_file_mapping
@@ -51,21 +50,6 @@ def combineData():
 def makeTraingDataFeatures(fname="features.csv"):
     df = combineData()
     df.to_csv(os.path.join(path_dir_data, fname), index=False)
-
-
-def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):
-    file = fname
-    if fname is loadTrainingDataFeatures.__defaults__[0]:
-        file = os.path.join(path_dir_data, fname)
-    df = pd.read_csv(file)
-    idList = df[['id']].values
-    df1 = df.drop(columns={'id'})
-    X = df1.values  # return a numpy array
-    if isNormalized:
-        scaler = preprocessing.StandardScaler()
-        X_scaled = scaler.fit_transform(X)
-        X = X_scaled
-    return idList, X
 
 
 def PolyRegression(degree, x, y):
