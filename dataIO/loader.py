@@ -1,19 +1,17 @@
 import ast
-import glob
-import os
 from sklearn import preprocessing
-
-from utils.config import path_dir_data
 import pandas as pd
 import numpy as np
+
+from utils.fileSystemUtils import getFullDataPath
 
 
 def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):
     file = fname
     if fname is loadTrainingDataFeatures.__defaults__[0]:
-        file = os.path.join(path_dir_data, fname)
+        file = getFullDataPath(fname)
     df = pd.read_csv(file)
-    idList = df[['id']].values
+    idList = df[['id']].values[:, 0]
     df1 = df.drop(columns={'id'})
     X = df1.values  # return a numpy array
     if isNormalized:
@@ -21,6 +19,18 @@ def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):
         X_scaled = scaler.fit_transform(X)
         X = X_scaled
     return idList, X
+
+
+# for auxiliary files, eg., precomputed tnse components
+def readNumpyArrayFile(file):
+    df = pd.read_csv(file)
+    X = df.values  # return a numpy array
+    return X
+
+
+def writeNumpyArrayFile(file, X):
+    df = pd.DataFrame(X)
+    df.to_csv(file, index=False)
 
 
 def createSubSet(X, nsample=1000):
@@ -38,11 +48,9 @@ def from_np_array(array_string):
 def loadTrainingDataOutput(fname='output.csv'):
     file = fname
     if fname is loadTrainingDataOutput.__defaults__[0]:
-        file = os.path.join(path_dir_data, fname)
+        file = getFullDataPath(fname)
     df = pd.read_csv(file, converters={'coef': from_np_array})
     idList = df[['id']].values[:, 0]
     df1 = df.drop(columns={'id'})
     coefs = df1.values[:, 0]  # return a numpy array
     return idList, coefs
-
-

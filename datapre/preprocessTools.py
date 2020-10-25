@@ -15,18 +15,19 @@ def loadAllCsv(path, pattern):
     return data
 
 
-def combineData():
+def combineData(path=path_dir_descriptor, pattern_1="1*.csv", pattern_2="2*.csv",
+                pattern_3="3*.csv", pattern_4="4*.csv"):
     # 1_Substrate
-    df1 = loadAllCsv(path_dir_descriptor, "1*.csv")
+    df1 = loadAllCsv(path, pattern_1)
     df1 = df1.drop("Compound", axis=1)
     # 2_Base or Conjugate
-    df2 = loadAllCsv(path_dir_descriptor, "2*.csv")
+    df2 = loadAllCsv(path, pattern_2)
     df2 = df2.drop("Compound", axis=1)
     # 3_Hydroxyamine or Oxoammonium
-    df3 = loadAllCsv(path_dir_descriptor, "3*.csv")
+    df3 = loadAllCsv(path, pattern_3)
     df3 = df3.drop("Compound", axis=1)
     # 4_Anti or Syn Ligand
-    df4 = loadAllCsv(path_dir_descriptor, "4*.csv")
+    df4 = loadAllCsv(path, pattern_4)
     df4 = df4.drop("Compound", axis=1)
     df1["tmp"] = 1
     df2["tmp"] = 1
@@ -47,9 +48,24 @@ def combineData():
     return df
 
 
-def makeTraingDataFeatures(fname="features.csv"):
-    df = combineData()
+def makeTraingDataFeatures(fname="features.csv", pattern_1="1*.csv", pattern_2="2*.csv",
+                           pattern_3="3*.csv", pattern_4="4*.csv"):
+    df = combineData(path=path_dir_descriptor, pattern_1=pattern_1, pattern_2=pattern_2, pattern_3=pattern_3,
+                     pattern_4=pattern_4)
+
     df.to_csv(os.path.join(path_dir_data, fname), index=False)
+
+
+# Make all training dataset
+makeTraingDataFeatures(fname="_featureSBHA.csv", pattern_2="2_B*.csv", pattern_3="3_H*.csv", pattern_4="4_Anti*.csv")
+makeTraingDataFeatures(fname="_featureSBHS.csv", pattern_2="2_B*.csv", pattern_3="3_H*.csv", pattern_4="4_Syn*.csv")
+makeTraingDataFeatures(fname="_featureSBOA.csv", pattern_2="2_B*.csv", pattern_3="3_O*.csv", pattern_4="4_Anti*.csv")
+makeTraingDataFeatures(fname="_featureSBOS.csv", pattern_2="2_B*.csv", pattern_3="3_O*.csv", pattern_4="4_Syn*.csv")
+
+makeTraingDataFeatures(fname="_featureCBHA.csv", pattern_2="2_C*.csv", pattern_3="3_H*.csv", pattern_4="4_Anti*.csv")
+makeTraingDataFeatures(fname="_featureCBHS.csv", pattern_2="2_C*.csv", pattern_3="3_H*.csv", pattern_4="4_Syn*.csv")
+makeTraingDataFeatures(fname="_featureCBOA.csv", pattern_2="2_C*.csv", pattern_3="3_O*.csv", pattern_4="4_Anti*.csv")
+makeTraingDataFeatures(fname="_featureCBOS.csv", pattern_2="2_C*.csv", pattern_3="3_O*.csv", pattern_4="4_Syn*.csv")
 
 
 def PolyRegression(degree, x, y):
