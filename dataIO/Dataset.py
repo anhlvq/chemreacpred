@@ -69,9 +69,12 @@ class FeatureDataset:
         if ax is None:
             plt.show()
 
-    def plot(self, colors="blue"):
+    def plot(self, colors="blue", addText=None):
         fig = plt.figure(figsize=(12, 6))
-        fig.suptitle(self.dataSetName)
+        if addText is not None:
+            fig.suptitle(self.dataSetName + " - " + addText)
+        else:
+            fig.suptitle(self.dataSetName)
         ax1 = fig.add_subplot(1, 2, 1)
         self.plot2D(colors=colors, ax=ax1)
         ax2 = fig.add_subplot(1, 2, 2, projection='3d')
