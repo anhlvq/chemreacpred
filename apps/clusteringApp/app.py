@@ -7,7 +7,7 @@ from plotly.io._orca import shutdown_server
 app = dash.Dash('ChemReacPred')
 server = app.server
 app.layout = html.Div([
-    html.H2('Hello World 3 '),
+    html.H2('Hello World 3 - clusteringApp'),
     dcc.Dropdown(
         id='dropdown',
         options=[{'label': i, 'value': i} for i in ['LA', 'NYC', 'MTL']],
