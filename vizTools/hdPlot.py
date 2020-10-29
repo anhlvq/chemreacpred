@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 
 # Visualize high dimensional data
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
 from utils.utils import PCAComp
 
 
@@ -40,3 +44,25 @@ def visualize2D(X, colors=0):
                , s=50)
     ax.grid()
     plt.show()
+
+
+def plot_tsne_pca(data, labels):
+    max_label = max(labels)
+    max_items = np.random.choice(range(data.shape[0]), size=3000, replace=False)
+
+    pca = PCA(n_components=2).fit_transform(data[max_items, :].todense())
+    tsne = TSNE().fit_transform(PCA(n_components=50).fit_transform(data[max_items, :].todense()))
+
+    idx = np.random.choice(range(pca.shape[0]), size=300, replace=False)
+    label_subset = labels[max_items]
+    label_subset = [cm.hsv(i / max_label) for i in label_subset[idx]]
+
+    f, ax = plt.subplots(1, 2, figsize=(14, 6))
+
+    ax[0].scatter(pca[idx, 0], pca[idx, 1], c=label_subset)
+    ax[0].set_title('PCA Cluster Plot')
+
+    ax[1].scatter(tsne[idx, 0], tsne[idx, 1], c=label_subset)
+    ax[1].set_title('TSNE Cluster Plot')
+
+
