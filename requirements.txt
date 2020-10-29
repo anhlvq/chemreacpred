@@ -9,7 +9,7 @@ jupyter==1.0.0
 dash==1.16.3
 coverage==5.3
 certifi==2020.6.20
-
+gunicorn
 
 scikit-learn>=0.23.1
 numpy>=1.18.1
