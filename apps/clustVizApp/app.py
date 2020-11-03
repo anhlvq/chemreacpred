@@ -11,7 +11,7 @@ from dash.dependencies import Input, Output
 from sklearn.cluster import KMeans
 from sklearn_extra.cluster import KMedoids
 
-from dataIO.Dataset import FeatureDataset
+from apps.clustVizApp.dataIO.Dataset import FeatureDataset
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
@@ -58,7 +58,7 @@ def create_table(idx, labels):
         )
 
 
-clustering_methods = ['KMeans', 'KMedoid-Euclidean', 'KMedoid-Cosine', 'KMedoid-Manhattan']
+clustering_methods = ['KMeans', 'KMedoids-Euclidean', 'KMedoids-Cosine', 'KMedoids-Manhattan']
 
 
 def doCluster(idx, k, method='KMeans'):
@@ -66,13 +66,13 @@ def doCluster(idx, k, method='KMeans'):
     if method == 'KMeans':
         km = KMeans(k)
         labels = km.fit_predict(X)
-    elif method == 'KMedoid-Euclidean':
+    elif method == 'KMedoids-Euclidean':
         kmedoids = KMedoids(n_clusters=k, metric='euclidean').fit(X)
         labels = kmedoids.labels_
-    elif method == 'KMedoid-Cosine':
+    elif method == 'KMedoids-Cosine':
         kmedoids = KMedoids(n_clusters=k, metric='cosine').fit(X)
         labels = kmedoids.labels_
-    elif method == 'KMedoid-Manhattan':
+    elif method == 'KMedoids-Manhattan':
         kmedoids = KMedoids(n_clusters=k, metric='manhattan').fit(X)
         labels = kmedoids.labels_
     else:

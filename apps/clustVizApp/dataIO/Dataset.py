@@ -1,11 +1,17 @@
-import glob
-
-from sklearn.manifold import TSNE
-
-from dataIO.loader import loadTrainingDataFeatures, readNumpyArrayFile, writeNumpyArrayFile
-from utils.fileSystemUtils import getBaseName, checkExists, getFullDataPath
+import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.manifold import TSNE
+
+from apps.clustVizApp.dataIO.loader import loadTrainingDataFeatures, readNumpyArrayFile, writeNumpyArrayFile
+
+
+def getBaseName(fname):
+    return os.path.basename(fname)
+
+
+def checkExists(filename):
+    return os.path.isfile(filename)
 
 
 def TSNEComp(X, n_components=3):
@@ -86,19 +92,3 @@ class FeatureDataset:
         ax2 = fig.add_subplot(1, 2, 2, projection='3d')
         self.plot3D(colors=colors, ax=ax2)
         plt.show()
-
-
-def LoadAllFeatureDataSets(filepattern="_feature*.csv", isNormalized=True):
-    all_files = glob.glob(getFullDataPath(filepattern))
-    ds_list = list()
-    for fname in all_files:
-        ds_list.append(FeatureDataset(fname, isNormalized))
-    return ds_list
-
-# ds = FeatureDataset(getFullDataPath('_featureSBHA.csv'))
-# lst = LoadAllFeatureDataSets()
-# lst[0].plot2D()
-
-# for ds in lst:
-#    X_2Comp = ds.tsne2Comp()
-#    X_3Comp = ds.tsne3Comp()
