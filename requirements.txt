@@ -13,3 +13,4 @@ scikit-learn
 scikit-learn-extra==0.1.0b2
 vecstack==0.4.0
 pandas
+matplotlib
