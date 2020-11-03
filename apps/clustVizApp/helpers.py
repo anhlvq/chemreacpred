@@ -8,13 +8,8 @@ def make_dash_table(selection, df):
     table = []
 
     for index, row in df_subset.iterrows():
-        rows = []
-        rows.append(html.Td([row["NAME"]]))
-        rows.append(html.Td([html.Img(src=row["IMG_URL"])]))
-        rows.append(html.Td([row["FORM"]]))
-        rows.append(
-            html.Td([html.A(href=row["PAGE"], children="Datasheet", target="_blank")])
-        )
+        rows = [html.Td([row["NAME"]]), html.Td([html.Img(src=row["IMG_URL"])]), html.Td([row["FORM"]]),
+                html.Td([html.A(href=row["PAGE"], children="Datasheet", target="_blank")])]
         table.append(html.Tr(rows))
 
     return table
