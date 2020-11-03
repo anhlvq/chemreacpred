@@ -15,39 +15,6 @@ def make_dash_table(selection, df):
     return table
 
 
-def _add_markers(figure_data, molecules, plot_type="scatter3d"):
-    """
-    Add markers on the plot graph.
-
-    :params figure_data: the graph data
-    :params molecules: list of selected molecules
-    :params plot_type: plot type (scatter3d, histogram2d, scatter)
-    :returns: plotly graph trace list
-    """
-
-    drug_data = figure_data[0]
-    list_of_drugs = drug_data["text"]
-
-    # get the axis index for each drug
-    indices = [index for index, value in enumerate(list_of_drugs) if value in molecules]
-
-    if plot_type == "histogram2d":
-        plot_type = "scatter"
-
-    traces = []
-    for point_number in indices:
-        trace = {
-            "x": [drug_data["x"][point_number]],
-            "y": [drug_data["y"][point_number]],
-            "marker": {"color": "red", "size": 16, "opacity": 0.6, "symbol": "cross"},
-            "type": plot_type,
-        }
-        if plot_type == "scatter3d":
-            trace["z"] = [drug_data["z"][point_number]]
-        traces.append(trace)
-    return traces
-
-
 def _create_axis(axis_type, variation="Linear", title=None):
     """
     Creates a 2d or 3d axis.
@@ -135,7 +102,6 @@ def create_plot3D(x,
                   xlabel="X",
                   ylabel="Y",
                   zlabel="Z",
-                  markers=[],
                   ):
     plot_type = 'scatter3d'
 
@@ -150,7 +116,7 @@ def create_plot3D(x,
                 "reversescale": True,
                 "sizeref": 45,
                 "sizemode": "diameter",
-                "opacity": 0.7,
+                "opacity": 0.5,
                 "size": size,
                 "color": color,
             },
@@ -160,9 +126,6 @@ def create_plot3D(x,
     ]
 
     layout = _create_layout(plot_type, xlabel, ylabel, zlabel)
-
-    if len(markers) > 0:
-        data = data + _add_markers(data, markers, plot_type=plot_type)
 
     return {"data": data, "layout": layout}
 
@@ -174,7 +137,6 @@ def create_plot2D(x,
                   name,
                   xlabel="X",
                   ylabel="Y",
-                  markers=[],
                   ):
     plot_type = 'scatter'
     data = [
@@ -197,9 +159,6 @@ def create_plot2D(x,
     ]
 
     layout = _create_layout(plot_type, xlabel, ylabel, '')
-
-    if len(markers) > 0:
-        data = data + _add_markers(data, markers, plot_type=plot_type)
 
     return {"data": data, "layout": layout}
 
