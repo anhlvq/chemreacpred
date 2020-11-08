@@ -15,6 +15,7 @@ def loadAllCsv(path, pattern):
     return data
 
 
+'''
 def combineData(path=path_dir_descriptor, pattern_1="1*.csv", pattern_2="2*.csv",
                 pattern_3="3*.csv", pattern_4="4*.csv"):
     # 1_Substrate
@@ -44,6 +45,40 @@ def combineData(path=path_dir_descriptor, pattern_1="1*.csv", pattern_2="2*.csv"
     df = pd.merge(df, df4, on=['tmp'])
     df["id"] = df["id"] + "_" + df["Name"]
     df = df.drop(columns={"Name"})
+    df = df.drop('tmp', axis=1)
+    return df
+'''
+
+
+def combineData(path=path_dir_descriptor, pattern_1="1*.csv", pattern_2="2*.csv",
+                pattern_3="3*.csv", pattern_4="4*.csv"):
+    # 1_Substrate
+    df1 = loadAllCsv(path, pattern_1)
+    df1 = df1.drop("Name", axis=1)
+    # 2_Base or Conjugate
+    df2 = loadAllCsv(path, pattern_2)
+    df2 = df2.drop("Name", axis=1)
+    # 3_Hydroxyamine or Oxoammonium
+    df3 = loadAllCsv(path, pattern_3)
+    df3 = df3.drop("Name", axis=1)
+    # 4_Anti or Syn Ligand
+    df4 = loadAllCsv(path, pattern_4)
+    df4 = df4.drop("Name", axis=1)
+    df1["tmp"] = 1
+    df2["tmp"] = 1
+    df3["tmp"] = 1
+    df4["tmp"] = 1
+
+    df1.rename(columns={"Compound": "id"}, inplace=True)
+    df = pd.merge(df1, df2, on=['tmp'])
+    df["id"] = df["id"] + "_" + df["Compound"]
+    df = df.drop(columns={"Compound"})
+    df = pd.merge(df, df3, on=['tmp'])
+    df["id"] = df["id"] + "_" + df["Compound"]
+    df = df.drop(columns={"Compound"})
+    df = pd.merge(df, df4, on=['tmp'])
+    df["id"] = df["id"] + "_" + df["Compound"]
+    df = df.drop(columns={"Compound"})
     df = df.drop('tmp', axis=1)
     return df
 

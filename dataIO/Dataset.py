@@ -95,10 +95,14 @@ def LoadAllFeatureDataSets(filepattern="_feature*.csv", isNormalized=True):
         ds_list.append(FeatureDataset(fname, isNormalized))
     return ds_list
 
-# ds = FeatureDataset(getFullDataPath('_featureSBHA.csv'))
+
+ds = FeatureDataset(getFullDataPath('_featureSubstrate.csv'))
+ds.tsne2Comp()
+ds.tsne3Comp()
 # lst = LoadAllFeatureDataSets()
 # lst[0].plot2D()
 
 # for ds in lst:
 #    X_2Comp = ds.tsne2Comp()
 #    X_3Comp = ds.tsne3Comp()
+
