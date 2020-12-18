@@ -2,7 +2,8 @@ import glob
 
 from sklearn.manifold import TSNE
 
-from dataIO.loader import loadTrainingDataFeatures, readNumpyArrayFile, writeNumpyArrayFile
+from dataIO.dbloader import generateAllDataSets
+from dataIO.loader import getFeatureFromDF, loadTrainingDataFeatures, readNumpyArrayFile, writeNumpyArrayFile
 from utils.fileSystemUtils import getBaseName, checkExists, getFullDataPath
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -19,10 +20,17 @@ class FeatureDataset:
     idList = None
     features = None
 
-    def __init__(self, fname, isNormalized=True):
-        self.dataSetName = getBaseName(fname)
-        self.filePath = fname
-        self.idList, self.features = loadTrainingDataFeatures(self.filePath, isNormalized=isNormalized)
+    def __init__(self, fname, df=None, isNormalized=True):
+        if df is None:
+            # read data from file
+            self.dataSetName = getBaseName(fname)
+            self.filePath = fname
+            self.idList, self.features = loadTrainingDataFeatures(self.filePath, isNormalized=isNormalized)
+        else:
+            # using dataframe df
+            self.idList, self.features = getFeatureFromDF(df, isNormalized)
+            self.dataSetName = fname
+            self.filePath = getFullDataPath(fname)
 
     def tsne2Comp(self):
         file = self.filePath + ".tsne2Comp"
@@ -99,10 +107,21 @@ def LoadAllFeatureDataSets(filepattern="_feature*.csv", isNormalized=True):
 ds = FeatureDataset(getFullDataPath('_featureSubstrate.csv'))
 ds.tsne2Comp()
 ds.tsne3Comp()
+
+
 # lst = LoadAllFeatureDataSets()
 # lst[0].plot2D()
 
-# for ds in lst:
-#    X_2Comp = ds.tsne2Comp()
-#    X_3Comp = ds.tsne3Comp()
+def LoadAllFeatureDataSetsDB(db_file="../data/3_processed/data.sqlite", isNormalized=True):
+    dblist = generateAllDataSets(db_file=db_file)
+    lst = []
+    for fname, df in dblist.items():
+        lst.append(FeatureDataset(fname=fname, df=df, isNormalized=isNormalized))
+    return lst
 
+
+lst = LoadAllFeatureDataSetsDB()
+
+for ds in lst:
+    X_2Comp = ds.tsne2Comp()
+    X_3Comp = ds.tsne3Comp()

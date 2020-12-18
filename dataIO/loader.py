@@ -6,11 +6,7 @@ import numpy as np
 from utils.fileSystemUtils import getFullDataPath
 
 
-def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):
-    file = fname
-    if fname is loadTrainingDataFeatures.__defaults__[0]:
-        file = getFullDataPath(fname)
-    df = pd.read_csv(file)
+def getFeatureFromDF(df, isNormalized=True):
     idList = df[['id']].values[:, 0]
     df1 = df.drop(columns={'id'})
     X = df1.values  # return a numpy array
@@ -19,6 +15,14 @@ def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):
         X_scaled = scaler.fit_transform(X)
         X = X_scaled
     return idList, X
+
+
+def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):
+    file = fname
+    if fname is loadTrainingDataFeatures.__defaults__[0]:
+        file = getFullDataPath(fname)
+    df = pd.read_csv(file)
+    return getFeatureFromDF(df, isNormalized)
 
 
 # for auxiliary files, eg., precomputed tnse components
