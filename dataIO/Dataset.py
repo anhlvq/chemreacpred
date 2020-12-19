@@ -1,6 +1,7 @@
 import glob
 
-from sklearn.manifold import TSNE
+# from sklearn.manifold import TSNE
+from MulticoreTSNE import MulticoreTSNE as TSNE
 
 from dataIO.dbloader import generateAllDataSets
 from dataIO.loader import getFeatureFromDF, loadTrainingDataFeatures, readNumpyArrayFile, writeNumpyArrayFile
@@ -10,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def TSNEComp(X, n_components=3):
-    tsne = TSNE(n_components=n_components, verbose=1, perplexity=40, n_iter=300)
+    tsne = TSNE(n_jobs=2, n_components=n_components, verbose=1, perplexity=40, n_iter=300)
     return tsne.fit_transform(X)
 
 
