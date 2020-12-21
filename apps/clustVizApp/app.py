@@ -15,10 +15,11 @@ from apps.clustVizApp.dataIO.Dataset import FeatureDataset, checkExists
 from apps.clustVizApp.dataIO.dbloader import listAllDataSets, loadDataSet
 from apps.clustVizApp.dataIO.loader import readNumpyArrayFile, writeNumpyArrayFile
 
+DATA_PATH = '../../data/3_processed'
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-DATA_PATH = '../../data/3_processed'
 dbfile = os.path.join(DATA_PATH, 'data.sqlite')
 # all_files = glob.glob(os.path.join(DATA_PATH, '_feature*.csv'))
 # ds_list = list()
