@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.manifold import TSNE
 
-from apps.clustVizApp.dataIO.loader import loadTrainingDataFeatures, readNumpyArrayFile, writeNumpyArrayFile
+from apps.clustVizApp.dataIO.dbloader import generateAllDataSets
+from apps.clustVizApp.dataIO.loader import loadTrainingDataFeatures, getFeatureFromDF, readNumpyArrayFile, \
+    writeNumpyArrayFile
 
 
 def getBaseName(fname):
@@ -25,16 +27,22 @@ class FeatureDataset:
     idList = None
     features = None
 
-    def __init__(self, fname, isNormalized=True):
+    def __init__(self, fname, df=None, isNormalized=True, n_components=0):
         self.dataSetName = getBaseName(fname)
         self.filePath = fname
-        self.idList, self.features = loadTrainingDataFeatures(self.filePath, isNormalized=isNormalized)
+        if df is None:
+            # read data from file
+            self.idList, self.features = loadTrainingDataFeatures(self.filePath, isNormalized=isNormalized)
+        else:
+            # using dataframe df
+            self.idList, self.features = getFeatureFromDF(df, isNormalized, n_components)
 
     def tsne2Comp(self):
         file = self.filePath + ".tsne2Comp"
         if checkExists(file):
             return readNumpyArrayFile(file)
         else:
+            print('Precomputed file ' + file + ' does not exist. Begin computing...')
             X = TSNEComp(self.features, 2)
             writeNumpyArrayFile(file, X)
             return X
@@ -44,6 +52,7 @@ class FeatureDataset:
         if checkExists(file):
             return readNumpyArrayFile(file)
         else:
+            print('Precomputed file ' + file + ' does not exist. Begin computing...')
             X = TSNEComp(self.features, 3)
             writeNumpyArrayFile(file, X)
             return X
@@ -92,3 +101,12 @@ class FeatureDataset:
         ax2 = fig.add_subplot(1, 2, 2, projection='3d')
         self.plot3D(colors=colors, ax=ax2)
         plt.show()
+
+
+def LoadAllFeatureDataSetsDB(db_file="../data/3_processed/data.sqlite", isNormalized=True, n_components=0):
+    dblist = generateAllDataSets(db_file=db_file)
+    path = os.path.dirname(db_file)
+    lst = []
+    for fname, df in dblist.items():
+        lst.append(FeatureDataset(fname=os.path.join(path, fname), df=df, isNormalized=isNormalized, n_components=n_components))
+    return lst

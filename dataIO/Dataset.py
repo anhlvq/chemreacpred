@@ -105,9 +105,9 @@ def LoadAllFeatureDataSets(filepattern="_feature*.csv", isNormalized=True, n_com
     return ds_list
 
 
-ds = FeatureDataset(getFullDataPath('_featureSubstrate.csv'))
-ds.tsne2Comp()
-ds.tsne3Comp()
+#ds = FeatureDataset(getFullDataPath('_featureSubstrate.csv'))
+#ds.tsne2Comp()
+#ds.tsne3Comp()
 
 
 # lst = LoadAllFeatureDataSets()
@@ -117,12 +117,13 @@ def LoadAllFeatureDataSetsDB(db_file="../data/3_processed/data.sqlite", isNormal
     dblist = generateAllDataSets(db_file=db_file)
     lst = []
     for fname, df in dblist.items():
-        df.to_csv(getFullDataPath(fname)+'.csv')
+        if not checkExists(getFullDataPath(fname)+'.csv'):
+            df.to_csv(getFullDataPath(fname)+'.csv')
         lst.append(FeatureDataset(fname=fname, df=df, isNormalized=isNormalized,n_components=n_components))
     return lst
 
 
-lst = LoadAllFeatureDataSetsDB(isNormalized=False)
+#lst = LoadAllFeatureDataSetsDB(isNormalized=False)
 
 #for ds in lst:
 #    X_2Comp = ds.tsne2Comp()

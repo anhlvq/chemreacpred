@@ -1,6 +1,6 @@
 import glob
 import os
-
+import time
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
@@ -11,17 +11,20 @@ from dash.dependencies import Input, Output
 from sklearn.cluster import KMeans
 from sklearn_extra.cluster import KMedoids
 
-from apps.clustVizApp.dataIO.Dataset import FeatureDataset
+from apps.clustVizApp.dataIO.Dataset import FeatureDataset, LoadAllFeatureDataSetsDB, checkExists
+from apps.clustVizApp.dataIO.loader import readNumpyArrayFile, writeNumpyArrayFile
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
 DATA_PATH = './data'
-all_files = glob.glob(os.path.join(DATA_PATH, '_feature*.csv'))
-ds_list = list()
-for fname in all_files:
-    ds_list.append(FeatureDataset(fname, True))
-
+# all_files = glob.glob(os.path.join(DATA_PATH, '_feature*.csv'))
+# ds_list = list()
+# for fname in all_files:
+#    ds_list.append(FeatureDataset(fname, True))
+print('Load datasets...')
+ds_list = LoadAllFeatureDataSetsDB(os.path.join(DATA_PATH, 'data.sqlite'))
+print('Done.')
 
 def create_plot(idx, labels='blue', plot_type='scater3d'):
     ds = ds_list[idx]
@@ -36,6 +39,7 @@ def create_plot(idx, labels='blue', plot_type='scater3d'):
             y=X[:, 1],
             color=labels,
             hover_name=idList,
+            title=ds.dataSetName + " | Number of Clusters = " + str(max(labels)+1),
         )
     return FIG
 
@@ -48,35 +52,41 @@ def update_table_data(idx, labels):
 
 def create_table(idx, labels):
     return dash_table.DataTable(
-            id='table',
-            columns=[{"id": "ID", "name": "ID"}, {"id": "Cluster", "name": "Cluster"}],
-            data=update_table_data(idx, labels),
-            sort_action="native",
-            sort_mode="multi",
-            filter_action="native",
-            row_selectable="single",
-        )
+        id='table',
+        columns=[{"id": "ID", "name": "ID"}, {"id": "Cluster", "name": "Cluster"}],
+        data=update_table_data(idx, labels),
+        sort_action="native",
+        sort_mode="multi",
+        filter_action="native",
+        row_selectable="single",
+    )
 
 
 clustering_methods = ['KMeans', 'KMedoids-Euclidean', 'KMedoids-Cosine', 'KMedoids-Manhattan']
 
-
 def doCluster(idx, k, method='KMeans'):
-    X = ds_list[idx].features
-    if method == 'KMeans':
-        km = KMeans(k)
-        labels = km.fit_predict(X)
-    elif method == 'KMedoids-Euclidean':
-        kmedoids = KMedoids(n_clusters=k, metric='euclidean').fit(X)
-        labels = kmedoids.labels_
-    elif method == 'KMedoids-Cosine':
-        kmedoids = KMedoids(n_clusters=k, metric='cosine').fit(X)
-        labels = kmedoids.labels_
-    elif method == 'KMedoids-Manhattan':
-        kmedoids = KMedoids(n_clusters=k, metric='manhattan').fit(X)
-        labels = kmedoids.labels_
+    ds = ds_list[idx]
+    file = ds.filePath + "." + str(k) + "." + method
+    if checkExists(file):
+        labels = readNumpyArrayFile(file)
+        labels = labels.reshape(1, -1)[0, :]
     else:
-        labels = {i for i in range(0, X.shape[1])}
+        X = ds.features
+        if method == 'KMeans':
+            km = KMeans(k)
+            labels = km.fit_predict(X)
+        elif method == 'KMedoids-Euclidean':
+            kmedoids = KMedoids(n_clusters=k, metric='euclidean').fit(X)
+            labels = kmedoids.labels_
+        elif method == 'KMedoids-Cosine':
+            kmedoids = KMedoids(n_clusters=k, metric='cosine').fit(X)
+            labels = kmedoids.labels_
+        elif method == 'KMedoids-Manhattan':
+            kmedoids = KMedoids(n_clusters=k, metric='manhattan').fit(X)
+            labels = kmedoids.labels_
+        else:
+            labels = {i for i in range(0, X.shape[1])}
+        writeNumpyArrayFile(file, labels)
     return labels
 
 
@@ -193,8 +203,17 @@ app.layout = html.Div(
      Input("dropdown-clustering-method", "value")],
 )
 def change_plot_type(plot_type, idx, k, clusteringmethod):
+    print('Clustering...')
+    st = time.time()
     labels = doCluster(idx=idx, k=k, method=clusteringmethod)
-    return [create_plot(idx=idx, plot_type=plot_type, labels=labels), update_table_data(idx=idx, labels=labels)]
+    print("--- %s seconds ---" % (time.time() - st))
+    print('Ploting...')
+    FIG = create_plot(idx=idx, plot_type=plot_type, labels=labels)
+    print("--- %s seconds ---" % (time.time() - st))
+    print('Update table...')
+    TAB = update_table_data(idx=idx, labels=labels)
+    print("--- %s seconds ---" % (time.time() - st))
+    return [FIG, TAB]
 
 
 if __name__ == "__main__":

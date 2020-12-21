@@ -2,6 +2,23 @@ import ast
 from sklearn import preprocessing
 import pandas as pd
 import numpy as np
+from sklearn.decomposition import PCA
+
+
+def getFeatureFromDF(df, isNormalized=True, n_components=0):
+    idList = df[['id']].values[:, 0]
+    df1 = df.drop(columns={'id'})
+    X = df1.values  # return a numpy array
+    if isNormalized:
+        scaler = preprocessing.StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        X = X_scaled
+    if n_components > 0:
+        # do PCA
+        pca = PCA(n_components=n_components)
+        pca.fit(X)
+        X = pca.transform(X)
+    return idList, X
 
 
 def loadTrainingDataFeatures(fname='features.csv', isNormalized=True):

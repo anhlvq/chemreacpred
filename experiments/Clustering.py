@@ -25,7 +25,7 @@ def searchBestNumberOfClusters(ds, method='KMedoids', min_silhouette_score=0.05)
             new_row = {'nclusters': i, 'silhouettescore': score3}
             df = df.append(new_row, ignore_index=True)
     df.sort_values(by=['silhouettescore'], ascending=False, inplace=True)
-    df.to_csv('Results/'+ds.dataSetName+'silhouette_score_' + method + '.csv', index=False)
+    df.to_csv('Results/' + ds.dataSetName + 'silhouette_score_' + method + '.csv', index=False)
     return df
 
 
@@ -53,15 +53,25 @@ def doCluster(ds, k, method='KMeans'):
     return labels
 
 
+########
+print('Loading all datasets...')
 ds_list = LoadAllFeatureDataSetsDB(isNormalized=True)
+print('Clustering...')
+for i in range(0,len(ds_list)):
+    #print('...processing ' . str(i) . '/' . str(len(ds_list)) + '...')
+    for k in range(2, 50):
+        #print(k + ' ')
+        doCluster(ds_list[i], k, 'KMeans')
+#    print(ds)
+#    doCluster(ds, 2, method='KMeans')
+# print(searchBestNumberOfClusters(ds, method='Kmean'))
+# print(searchBestNumberOfClusters(ds, method='KMedoids'))
 
-for ds in ds_list:
-    print(ds)
-    doCluster(ds, 2, method='KMeans')
-    #print(searchBestNumberOfClusters(ds, method='Kmean'))
-    #print(searchBestNumberOfClusters(ds, method='KMedoids'))
 
-#idList = ds.idList
-#print(idList.shape)
-#X = ds.features
-#print(X.shape)
+#ds = FeatureDataset(fname='../data/3_processed/1_Substrate_2_Base_3_Hydroxylamine_4_Syn_Ligand.csv', isNormalized=True)
+#doCluster(ds, 20, method='KMeans')
+
+# idList = ds.idList
+# print(idList.shape)
+# X = ds.features
+# print(X.shape)
