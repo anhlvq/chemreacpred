@@ -11,23 +11,29 @@ from dash.dependencies import Input, Output
 from sklearn.cluster import KMeans
 from sklearn_extra.cluster import KMedoids
 
-from apps.clustVizApp.dataIO.Dataset import FeatureDataset, LoadAllFeatureDataSetsDB, checkExists
+from apps.clustVizApp.dataIO.Dataset import FeatureDataset, checkExists
+from apps.clustVizApp.dataIO.dbloader import listAllDataSets, loadDataSet
 from apps.clustVizApp.dataIO.loader import readNumpyArrayFile, writeNumpyArrayFile
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-DATA_PATH = '../../../data/3_processed'
+DATA_PATH = '../../data/3_processed'
+dbfile = os.path.join(DATA_PATH, 'data.sqlite')
 # all_files = glob.glob(os.path.join(DATA_PATH, '_feature*.csv'))
 # ds_list = list()
 # for fname in all_files:
 #    ds_list.append(FeatureDataset(fname, True))
 print('Load datasets...')
-ds_list = LoadAllFeatureDataSetsDB(os.path.join(DATA_PATH, 'data.sqlite'))
+dsName_list, pattern_list = listAllDataSets(dbfile)
+
+fname, df = loadDataSet(dbfile, pattern_list[0])
+fname = os.path.join(DATA_PATH, fname)
+currentds = FeatureDataset(fname, df=df, isNormalized=True)
 print('Done.')
 
-def create_plot(idx, labels='blue', plot_type='scater3d'):
-    ds = ds_list[idx]
+
+def create_plot(ds, labels='blue', plot_type='scater3d'):
     idList = ds.idList
     if plot_type == 'scatter3d':
         X = ds.tsne3Comp()
@@ -39,22 +45,21 @@ def create_plot(idx, labels='blue', plot_type='scater3d'):
             y=X[:, 1],
             color=labels,
             hover_name=idList,
-            title=ds.dataSetName + " | Number of Clusters = " + str(max(labels)+1),
+            title=ds.dataSetName + " | Number of Clusters = " + str(max(labels) + 1),
         )
     return FIG
 
 
-def update_table_data(idx, labels):
-    ds = ds_list[idx]
+def update_table_data(ds, labels):
     idList = ds.idList
     return [{"ID": idList[i], "Cluster": labels[i]} for i in range(0, len(idList))]
 
 
-def create_table(idx, labels):
+def create_table(ds, labels):
     return dash_table.DataTable(
         id='table',
         columns=[{"id": "ID", "name": "ID"}, {"id": "Cluster", "name": "Cluster"}],
-        data=update_table_data(idx, labels),
+        data=update_table_data(ds, labels),
         sort_action="native",
         sort_mode="multi",
         filter_action="native",
@@ -64,8 +69,9 @@ def create_table(idx, labels):
 
 clustering_methods = ['KMeans', 'KMedoids-Euclidean', 'KMedoids-Cosine', 'KMedoids-Manhattan']
 
-def doCluster(idx, k, method='KMeans'):
-    ds = ds_list[idx]
+
+def doCluster(ds, k, method='KMeans'):
+    print(ds)
     file = ds.filePath + "." + str(k) + "." + method
     if checkExists(file):
         labels = readNumpyArrayFile(file)
@@ -117,9 +123,9 @@ sidebar = html.Div(
                 id="dropdown-dataset",
                 searchable=False,
                 clearable=False,
-                options=[{'label': ds_list[i].dataSetName,
+                options=[{'label': dsName_list[i],
                           'value': i}
-                         for i in range(0, len(ds_list))
+                         for i in range(0, len(dsName_list))
                          ],
                 placeholder="Select a dataset",
                 value=0,
@@ -154,8 +160,8 @@ sidebar = html.Div(
     ],
     className='three columns',
 )
-
-FIGURE = create_plot(0, labels=doCluster(0, 2), plot_type='scatter')
+labels = doCluster(currentds, k=2)
+FIGURE = create_plot(currentds, labels=labels, plot_type='scatter')
 
 content = html.Div(
     [
@@ -175,7 +181,7 @@ content = html.Div(
             hoverData={"points": [{"pointNumber": 0}]},
             figure=FIGURE,
         ),
-        create_table(0, doCluster(0, 2))
+        create_table(currentds, doCluster(currentds, 2))
 
     ],
     className="nine columns",
@@ -205,13 +211,17 @@ app.layout = html.Div(
 def change_plot_type(plot_type, idx, k, clusteringmethod):
     print('Clustering...')
     st = time.time()
-    labels = doCluster(idx=idx, k=k, method=clusteringmethod)
+    global currentds
+    fname, df = loadDataSet(db_file=dbfile, patterns=pattern_list[idx])
+    fname = os.path.join(DATA_PATH, fname)
+    currentds = FeatureDataset(fname, df=df, isNormalized=True)
+    labels = doCluster(currentds, k=k, method=clusteringmethod)
     print("--- %s seconds ---" % (time.time() - st))
     print('Ploting...')
-    FIG = create_plot(idx=idx, plot_type=plot_type, labels=labels)
+    FIG = create_plot(currentds, plot_type=plot_type, labels=labels)
     print("--- %s seconds ---" % (time.time() - st))
     print('Update table...')
-    TAB = update_table_data(idx=idx, labels=labels)
+    TAB = update_table_data(currentds, labels=labels)
     print("--- %s seconds ---" % (time.time() - st))
     return [FIG, TAB]
 

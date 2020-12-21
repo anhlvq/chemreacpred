@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.manifold import TSNE
 
-from apps.clustVizApp.dataIO.dbloader import generateAllDataSets
 from apps.clustVizApp.dataIO.loader import loadTrainingDataFeatures, getFeatureFromDF, readNumpyArrayFile, \
     writeNumpyArrayFile
 
@@ -103,10 +102,3 @@ class FeatureDataset:
         plt.show()
 
 
-def LoadAllFeatureDataSetsDB(db_file="../data/3_processed/data.sqlite", isNormalized=True, n_components=0):
-    dblist = generateAllDataSets(db_file=db_file)
-    path = os.path.dirname(db_file)
-    lst = []
-    for fname, df in dblist.items():
-        lst.append(FeatureDataset(fname=os.path.join(path, fname), df=df, isNormalized=isNormalized, n_components=n_components))
-    return lst
