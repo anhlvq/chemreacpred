@@ -2,7 +2,9 @@ from sklearn_extra.cluster import KMedoids
 from sklearn.cluster import KMeans
 from sklearn import metrics
 import pandas as pd
-from dataIO.Dataset import FeatureDataset, LoadAllFeatureDataSets
+from dataIO.Dataset import FeatureDataset, LoadAllFeatureDataSets, LoadAllFeatureDataSetsDB
+from dataIO.loader import readNumpyArrayFile, writeNumpyArrayFile
+from utils.fileSystemUtils import checkExists
 
 
 def searchBestNumberOfClusters(ds, method='KMedoids', min_silhouette_score=0.05):
@@ -27,11 +29,37 @@ def searchBestNumberOfClusters(ds, method='KMedoids', min_silhouette_score=0.05)
     return df
 
 
-ds_list = LoadAllFeatureDataSets(isNormalized=True)
+def doCluster(ds, k, method='KMeans'):
+    file = ds.filePath + "." + str(k) + "." + method
+    if checkExists(file):
+        labels = readNumpyArrayFile(file)
+    else:
+        X = ds.features
+        if method == 'KMeans':
+            km = KMeans(k)
+            labels = km.fit_predict(X)
+        elif method == 'KMedoids-Euclidean':
+            kmedoids = KMedoids(n_clusters=k, metric='euclidean').fit(X)
+            labels = kmedoids.labels_
+        elif method == 'KMedoids-Cosine':
+            kmedoids = KMedoids(n_clusters=k, metric='cosine').fit(X)
+            labels = kmedoids.labels_
+        elif method == 'KMedoids-Manhattan':
+            kmedoids = KMedoids(n_clusters=k, metric='manhattan').fit(X)
+            labels = kmedoids.labels_
+        else:
+            labels = {i for i in range(0, X.shape[1])}
+        writeNumpyArrayFile(file, labels)
+    return labels
+
+
+ds_list = LoadAllFeatureDataSetsDB(isNormalized=True)
 
 for ds in ds_list:
-    print(searchBestNumberOfClusters(ds, method='Kmean'))
-    print(searchBestNumberOfClusters(ds, method='KMedoids'))
+    print(ds)
+    doCluster(ds, 2, method='KMeans')
+    #print(searchBestNumberOfClusters(ds, method='Kmean'))
+    #print(searchBestNumberOfClusters(ds, method='KMedoids'))
 
 #idList = ds.idList
 #print(idList.shape)

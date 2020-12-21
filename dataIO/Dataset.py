@@ -21,7 +21,7 @@ class FeatureDataset:
     idList = None
     features = None
 
-    def __init__(self, fname, df=None, isNormalized=True):
+    def __init__(self, fname, df=None, isNormalized=True, n_components=0):
         if df is None:
             # read data from file
             self.dataSetName = getBaseName(fname)
@@ -29,7 +29,7 @@ class FeatureDataset:
             self.idList, self.features = loadTrainingDataFeatures(self.filePath, isNormalized=isNormalized)
         else:
             # using dataframe df
-            self.idList, self.features = getFeatureFromDF(df, isNormalized)
+            self.idList, self.features = getFeatureFromDF(df, isNormalized, n_components)
             self.dataSetName = fname
             self.filePath = getFullDataPath(fname)
 
@@ -97,11 +97,11 @@ class FeatureDataset:
         plt.show()
 
 
-def LoadAllFeatureDataSets(filepattern="_feature*.csv", isNormalized=True):
+def LoadAllFeatureDataSets(filepattern="_feature*.csv", isNormalized=True, n_components=0):
     all_files = glob.glob(getFullDataPath(filepattern))
     ds_list = list()
     for fname in all_files:
-        ds_list.append(FeatureDataset(fname, isNormalized))
+        ds_list.append(FeatureDataset(fname, isNormalized, n_components))
     return ds_list
 
 
@@ -113,16 +113,17 @@ ds.tsne3Comp()
 # lst = LoadAllFeatureDataSets()
 # lst[0].plot2D()
 
-def LoadAllFeatureDataSetsDB(db_file="../data/3_processed/data.sqlite", isNormalized=True):
+def LoadAllFeatureDataSetsDB(db_file="../data/3_processed/data.sqlite", isNormalized=True, n_components=0):
     dblist = generateAllDataSets(db_file=db_file)
     lst = []
     for fname, df in dblist.items():
-        lst.append(FeatureDataset(fname=fname, df=df, isNormalized=isNormalized))
+        df.to_csv(getFullDataPath(fname)+'.csv')
+        lst.append(FeatureDataset(fname=fname, df=df, isNormalized=isNormalized,n_components=n_components))
     return lst
 
 
-lst = LoadAllFeatureDataSetsDB()
+lst = LoadAllFeatureDataSetsDB(isNormalized=False)
 
-for ds in lst:
-    X_2Comp = ds.tsne2Comp()
-    X_3Comp = ds.tsne3Comp()
+#for ds in lst:
+#    X_2Comp = ds.tsne2Comp()
+#    X_3Comp = ds.tsne3Comp()
