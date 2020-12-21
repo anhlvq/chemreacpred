@@ -17,7 +17,7 @@ from apps.clustVizApp.dataIO.loader import readNumpyArrayFile, writeNumpyArrayFi
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-DATA_PATH = './data'
+DATA_PATH = '../../../data/3_processed'
 # all_files = glob.glob(os.path.join(DATA_PATH, '_feature*.csv'))
 # ds_list = list()
 # for fname in all_files:
