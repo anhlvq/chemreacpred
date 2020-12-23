@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_table
 import plotly.express as px
+import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 from sklearn.cluster import KMeans
 from sklearn_extra.cluster import KMedoids
@@ -41,12 +42,14 @@ def create_plot(ds, labels='blue', plot_type='scater3d'):
         FIG = px.scatter_3d(x=X[:, 0], y=X[:, 1], z=X[:, 2], color=labels, hover_name=idList)
     else:
         X = ds.tsne2Comp()
-        FIG = px.scatter(
+        FIG = go.Scattergl(
             x=X[:, 0],
             y=X[:, 1],
-            color=labels,
-            hover_name=idList,
-            title=ds.dataSetName + " | Number of Clusters = " + str(max(labels) + 1),
+            mode = 'markers',
+            # marker = dict(line=dict(width=1, color = labels)),
+            #fillcolor=labels,
+            #hovertext=idList,
+           # title=ds.dataSetName + " | Number of Clusters = " + str(max(labels) + 1),
         )
     return FIG
 

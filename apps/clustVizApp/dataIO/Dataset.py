@@ -35,7 +35,7 @@ class FeatureDataset:
         else:
             # using dataframe df
             self.idList, self.features = getFeatureFromDF(df, isNormalized, n_components)
-            self.features = None ####
+            #self.features = None
 
     def tsne2Comp(self):
         file = self.filePath + ".tsne2Comp"
