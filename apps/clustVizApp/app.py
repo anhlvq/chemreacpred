@@ -42,14 +42,21 @@ def create_plot(ds, labels='blue', plot_type='scater3d'):
         FIG = px.scatter_3d(x=X[:, 0], y=X[:, 1], z=X[:, 2], color=labels, hover_name=idList)
     else:
         X = ds.tsne2Comp()
-        FIG = go.Scattergl(
+        #FIG = go.Scattergl(
+        #    x=X[:, 0],
+        #    y=X[:, 1],
+        #    mode = 'markers',
+        #    # marker = dict(line=dict(width=1, color = labels)),
+        #    #fillcolor=labels,
+        #    #hovertext=idList,
+        #   # title=ds.dataSetName + " | Number of Clusters = " + str(max(labels) + 1),
+        #)
+        FIG = px.scatter(
             x=X[:, 0],
             y=X[:, 1],
-            mode = 'markers',
-            # marker = dict(line=dict(width=1, color = labels)),
-            #fillcolor=labels,
-            #hovertext=idList,
-           # title=ds.dataSetName + " | Number of Clusters = " + str(max(labels) + 1),
+            color=labels,
+            hover_name=idList,
+            title=ds.dataSetName + " | Number of Clusters = " + str(max(labels) + 1),
         )
     return FIG
 
@@ -75,7 +82,7 @@ clustering_methods = ['KMeans', 'KMedoids-Euclidean', 'KMedoids-Cosine', 'KMedoi
 
 
 def doCluster(ds, k, method='KMeans'):
-    print(ds)
+    #print(ds)
     file = ds.filePath + "." + str(k) + "." + method
     if checkExists(file):
         labels = readNumpyArrayFile(file)
